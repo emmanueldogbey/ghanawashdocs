@@ -1,0 +1,153 @@
+---
+title: "WASH Policy & Strategy Compendium"
+format: html
+page-layout: full
+---
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(glue)
+library(htmltools)
+library(rlang)   # for %||%
+
+# Function: extract IA identifier from URL
+get_identifier <- function(url) {
+  sub(".*/details/", "", url)
+}
+
+# Function: fetch metadata from Internet Archive
+get_metadata <- function(identifier) {
+  api_url <- glue("https://archive.org/metadata/{identifier}")
+  res <- httr::GET(api_url)
+  
+  if (res$status_code == 200) {
+    meta <- jsonlite::fromJSON(content(res, "text", encoding = "UTF-8"))
+    
+    # 🔹 Find first PDF file (if exists)
+    pdf_file <- meta$files$name[grepl("\\.pdf$", meta$files$name, ignore.case = TRUE)][1] %||% NA_character_
+    pdf_url <- if (!is.na(pdf_file)) {
+      glue("https://archive.org/download/{identifier}/{pdf_file}")
+    } else {
+      glue("https://archive.org/details/{identifier}")  # fallback
+    }
+    
+    list(
+      title   = meta$metadata$title   %||% NA_character_,
+      year    = as.character(meta$metadata$date %||% NA_character_),
+      creator = meta$metadata$creator %||% NA_character_,
+      sector  = (meta$metadata$subject %||% NA_character_)[1],
+      url     = pdf_url   # 🔹 direct PDF if available
+    )
+  } else {
+    list(
+      title   = identifier,
+      year    = NA_integer_,
+      creator = NA_character_,
+      sector  = NA_character_,
+      url     = glue("https://archive.org/details/{identifier}")
+    )
+  }
+}
+
+# Read your docs.csv
+docs <- read_csv("docs.csv")
+
+# Extract identifier + metadata
+docs_meta <- docs %>%
+  mutate(identifier = get_identifier(url)) %>%
+  mutate(meta = map(identifier, get_metadata)) %>%
+  unnest_wider(meta, names_sep = "_")
+
+# Unique options for filters
+years <- docs_meta$meta_year %>% unique() %>% sort(na.last = TRUE)
+sectors <- docs_meta$meta_sector %>% unique() %>% sort(na.last = TRUE)
+
+# Build <option> tags
+year_options <- paste0('<option value="', years, '">', years, '</option>', collapse = "")
+sector_options <- paste0('<option value="', sectors, '">', sectors, '</option>', collapse = "")
+
+
+# Build HTML cards
+cards <- docs_meta %>%
+  rowwise() %>%
+  mutate(
+    card = glue('
+<div class="card" data-year="{meta_year}" data-sector="{meta_sector}">
+  <div class="card-body">
+    <h3 class="card-title">{meta_title}</h3>
+    {if (!is.na(meta_year)) glue("<p><strong>Year:</strong> {meta_year}</p>") else ""}
+    {if (!is.na(meta_creator)) glue("<p><strong>Creator:</strong> {meta_creator}</p>") else ""}
+    {if (!is.na(meta_sector)) glue("<p><strong>Sector:</strong> {meta_sector}</p>") else ""}
+    <a href="{meta_url}" class="btn btn-primary" target="_blank">Open PDF</a>
+  </div>
+</div>
+')) %>%
+  ungroup() %>%
+  pull(card) %>%
+  paste(collapse = "\n")
+
+
+filters <- HTML(glue::glue('
+<div class="filters">
+  <label for="year-filter">Filter by Year:</label>
+  <select id="year-filter">
+    <option value="">All</option>
+    {year_options}
+  </select>
+
+  <label for="sector-filter">Filter by Sector:</label>
+  <select id="sector-filter">
+    <option value="">All</option>
+    {sector_options}
+  </select>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {{
+  const cards = document.querySelectorAll(".card");
+  const yearFilter = document.getElementById("year-filter");
+  const sectorFilter = document.getElementById("sector-filter");
+
+  function filterCards() {{
+    const selectedYear = yearFilter.value;
+    const selectedSector = sectorFilter.value;
+    cards.forEach(card => {{
+      const matchYear = !selectedYear || card.dataset.year === selectedYear;
+      const matchSector = !selectedSector || card.dataset.sector === selectedSector;
+      card.style.display = (matchYear && matchSector) ? "" : "none";
+    }});
+  }}
+
+  yearFilter.addEventListener("change", filterCards);
+  sectorFilter.addEventListener("change", filterCards);
+}});
+</script>
+'))
+
+# 🔹 Footer / byline
+byline <- '
+<div class="byline" style="margin-top:2rem; text-align:center; font-size:0.9em; color:#555;">
+  Built by Emmanuel Dogbey
+  <a href="https://github.com/emmanueldogbey/ghanawashdocs.github.io" target="_blank" style="margin-left:8px;">
+    <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" 
+         alt="GitHub" width="24" height="24" style="vertical-align:middle;">
+  </a>
+</div>
+'
+
+# Wrap cards in grid layout
+HTML(glue('
+{filters}
+<div class="card-grid">
+  {cards}
+</div>
+{byline}
+'))
+
+
+```
+
