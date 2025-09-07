@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function() {{
 byline <- '
 <div class="byline" style="margin-top:2rem; text-align:center; font-size:0.9em; color:#555;">
   Built by Emmanuel Dogbey
-  <a href="https://github.com/emmanueldogbey/ghanawashdocs.github.io" target="_blank" style="margin-left:8px;">
+  <a href="https://github.com/emmanueldogbey/ghanawashdocs" target="_blank" style="margin-left:8px;">
     <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" 
          alt="GitHub" width="24" height="24" style="vertical-align:middle;">
   </a>
