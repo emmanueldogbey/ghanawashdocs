@@ -26,10 +26,6 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -41,18 +37,6 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap-dfb324f25d9b1687192fa8be62ac8f9c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
-  "location": "navbar",
-  "copy-button": false,
-  "collapse-after": 3,
-  "panel-placement": "end",
-  "type": "overlay",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -78,7 +62,6 @@ ul.task-list li input[type="checkbox"] {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
@@ -127,17 +110,27 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 <div class="cell-output-display no-overflow-x">
 <div class="filters">
+  <div class="filter-group">
   <label for="year-filter">Filter by Year:</label>
   <select id="year-filter">
     <option value="">All</option>
     <option value="2010">2010</option><option value="2018">2018</option><option value="2020">2020</option>
   </select>
+  </div>
 
+  <div class="filter-group">
   <label for="sector-filter">Filter by Sector:</label>
   <select id="sector-filter">
     <option value="">All</option>
     <option value="Environmental Sanitation">Environmental Sanitation</option><option value="Sanitation">Sanitation</option><option value="Solid waste">Solid waste</option>
   </select>
+  </div>
+
+  <div class="filter-group">
+  <label for="search-box">Search:</label>
+  <input type="text" id="search-box" placeholder="Type to search..." style="border: 0.5px solid #333; width: 250px;">
+  </div>
+  
 </div>
 
 <script>
@@ -145,23 +138,28 @@ document.addEventListener("DOMContentLoaded", function() {
   const cards = document.querySelectorAll(".card");
   const yearFilter = document.getElementById("year-filter");
   const sectorFilter = document.getElementById("sector-filter");
+  const searchBox = document.getElementById("search-box");
 
   function filterCards() {
     const selectedYear = yearFilter.value;
     const selectedSector = sectorFilter.value;
+    const searchQuery = searchBox.value.toLowerCase();
     cards.forEach(card => {
       const matchYear = !selectedYear || card.dataset.year === selectedYear;
       const matchSector = !selectedSector || card.dataset.sector === selectedSector;
-      card.style.display = (matchYear && matchSector) ? "" : "none";
+      const matchSearch = !searchQuery || card.dataset.title.includes(searchQuery);
+
+      card.style.display = (matchYear && matchSector && matchSearch) ? "" : "none";
     });
   }
 
   yearFilter.addEventListener("change", filterCards);
   sectorFilter.addEventListener("change", filterCards);
+  searchBox.addEventListener("input", filterCards);
 });
 </script>
 <div class="card-grid">
-  <div class="card" data-year="2010" data-sector="Environmental Sanitation">
+  <div class="card" data-year="2010" data-sector="Environmental Sanitation" data-title="ghana environmental sanitation policy 2010">
   <div class="card-body">
     <h3 class="card-title anchored">Ghana Environmental Sanitation Policy 2010</h3>
     <p><strong>Year:</strong> 2010</p>
@@ -170,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <a href="https://archive.org/download/ghana-environmental-sanitation-policy-2010/Ghana_Environmental_Sanitation_Policy_2010.pdf" class="btn btn-primary" target="_blank">Open PDF</a>
   </div>
 </div>
-<div class="card" data-year="2010" data-sector="Environmental Sanitation">
+<div class="card" data-year="2010" data-sector="Environmental Sanitation" data-title="national environmental sanitation strategy and action plan">
   <div class="card-body">
     <h3 class="card-title anchored">National Environmental Sanitation Strategy and Action Plan</h3>
     <p><strong>Year:</strong> 2010</p>
@@ -179,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <a href="https://archive.org/download/nessap-ghana-2010/NESSAP-Ghana-2010.pdf" class="btn btn-primary" target="_blank">Open PDF</a>
   </div>
 </div>
-<div class="card" data-year="2010" data-sector="Environmental Sanitation">
+<div class="card" data-year="2010" data-sector="Environmental Sanitation" data-title="handbook for the preparation of district environmental sanitation strategies and action plans">
   <div class="card-body">
     <h3 class="card-title anchored">Handbook for the Preparation of District Environmental Sanitation Strategies and Action Plans</h3>
     <p><strong>Year:</strong> 2010</p>
@@ -188,7 +186,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <a href="https://archive.org/download/dessap-handbook-2010/DESSAP-Handbook-2010.pdf" class="btn btn-primary" target="_blank">Open PDF</a>
   </div>
 </div>
-<div class="card" data-year="2020" data-sector="Solid waste">
+<div class="card" data-year="2020" data-sector="Solid waste" data-title="national solid waste management strategy for ghana">
   <div class="card-body">
     <h3 class="card-title anchored">National Solid Waste Management Strategy for Ghana</h3>
     <p><strong>Year:</strong> 2020</p>
@@ -197,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function() {
     <a href="https://archive.org/download/national-solid-waste-management-strategy/National Solid Waste Management Strategy.pdf" class="btn btn-primary" target="_blank">Open PDF</a>
   </div>
 </div>
-<div class="card" data-year="2018" data-sector="Sanitation">
+<div class="card" data-year="2018" data-sector="Sanitation" data-title="guidelines for targeting the poor and vulnerable for basic sanitation services in ghana">
   <div class="card-body">
     <h3 class="card-title anchored">Guidelines For Targeting The Poor And Vulnerable For Basic Sanitation Services In Ghana</h3>
     <p><strong>Year:</strong> 2018</p>

@@ -76,7 +76,7 @@ cards <- docs_meta %>%
   rowwise() %>%
   mutate(
     card = glue('
-<div class="card" data-year="{meta_year}" data-sector="{meta_sector}">
+<div class="card" data-year="{meta_year}" data-sector="{meta_sector}" data-title="{tolower(meta_title)}">
   <div class="card-body">
     <h3 class="card-title">{meta_title}</h3>
     {if (!is.na(meta_year)) glue("<p><strong>Year:</strong> {meta_year}</p>") else ""}
@@ -93,17 +93,27 @@ cards <- docs_meta %>%
 
 filters <- HTML(glue::glue('
 <div class="filters">
+  <div class="filter-group">
   <label for="year-filter">Filter by Year:</label>
   <select id="year-filter">
     <option value="">All</option>
     {year_options}
   </select>
+  </div>
 
+  <div class="filter-group">
   <label for="sector-filter">Filter by Sector:</label>
   <select id="sector-filter">
     <option value="">All</option>
     {sector_options}
   </select>
+  </div>
+
+  <div class="filter-group">
+  <label for="search-box">Search:</label>
+  <input type="text" id="search-box" placeholder="Type to search..." style="border: 0.5px solid #333; width: 250px;" />
+  </div>
+  
 </div>
 
 <script>
@@ -111,19 +121,24 @@ document.addEventListener("DOMContentLoaded", function() {{
   const cards = document.querySelectorAll(".card");
   const yearFilter = document.getElementById("year-filter");
   const sectorFilter = document.getElementById("sector-filter");
+  const searchBox = document.getElementById("search-box");
 
   function filterCards() {{
     const selectedYear = yearFilter.value;
     const selectedSector = sectorFilter.value;
+    const searchQuery = searchBox.value.toLowerCase();
     cards.forEach(card => {{
       const matchYear = !selectedYear || card.dataset.year === selectedYear;
       const matchSector = !selectedSector || card.dataset.sector === selectedSector;
-      card.style.display = (matchYear && matchSector) ? "" : "none";
+      const matchSearch = !searchQuery || card.dataset.title.includes(searchQuery);
+
+      card.style.display = (matchYear && matchSector && matchSearch) ? "" : "none";
     }});
   }}
 
   yearFilter.addEventListener("change", filterCards);
   sectorFilter.addEventListener("change", filterCards);
+  searchBox.addEventListener("input", filterCards);
 }});
 </script>
 '))
