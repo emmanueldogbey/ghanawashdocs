@@ -1,5 +1,5 @@
 ---
-title: "WASH Policy & Strategy Compendium"
+title: "Ghana WASH Policy & Strategy Repository"
 format: html
 page-layout: full
 ---
@@ -162,7 +162,6 @@ HTML(glue('
 </div>
 {byline}
 '))
-
 
 ```
 
